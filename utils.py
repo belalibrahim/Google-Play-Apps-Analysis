@@ -123,6 +123,9 @@ def get_data2():
 
     df, df_extended = get_preprocessed_data()
 
+    # For regularization
+    df = df[:700]
+
     X = df.drop(labels=['Category', 'Rating', 'Genres'], axis=1)
     y = df.Rating
 
@@ -142,8 +145,8 @@ def subset_selection(x, y):
         all_comb = list(set(combinations(range(l), n)))
         for i in all_comb:
             x_sub = x[:, list(i)]
-            coff = (np.dot(np.dot(np.linalg.inv(np.dot(x_sub.T, x_sub)), x_sub.T), y))
-            y_hat = (np.dot(coff.T, x_sub.T))
+            coeff = (np.dot(np.dot(np.linalg.inv(np.dot(x_sub.T, x_sub)), x_sub.T), y))
+            y_hat = (np.dot(coeff.T, x_sub.T))
             rss = sum(np.power(y - y_hat, 2))
             if rss < min_rss:
                 min_rss = rss
@@ -154,4 +157,33 @@ def subset_selection(x, y):
     plt.xlabel("Number of features")
     plt.ylabel("RSS")
     plt.title("Subset Selection")
+    plt.show()
+
+
+def apply_reg(x, y):
+    x = np.array(x)
+    y = np.array(y)
+
+    x_c = np.zeros(list(x.shape))
+    n_features = x.shape[1]
+
+    for i in range(n_features):
+        x_c[:, i] = (x[:, i] - np.mean(x[:, i])) / np.std(x[:, i])
+
+    lambda_ = np.arange(1000, 0, -1)
+    coefficients = np.zeros([n_features, 1000])
+    df_lambda = list()
+
+    for i in range(len(lambda_)):
+        coefficients[:, i] = (
+            np.dot(np.dot(np.linalg.inv(np.dot(x_c.T, x_c) + (np.dot(lambda_[i], np.eye(n_features)))), x_c.T), y))
+        df_lambda.append(
+            np.trace(np.dot(x_c, np.dot(np.linalg.inv(np.dot(x_c.T, x_c) + np.dot(lambda_[i], np.eye(n_features))), x_c.T))))
+
+    for i in range(n_features):
+        plt.plot(df_lambda, coefficients[i, :])
+
+    plt.xlabel("df(λ)")
+    plt.ylabel("Coefficients")
+    plt.title("Regularization")
     plt.show()
