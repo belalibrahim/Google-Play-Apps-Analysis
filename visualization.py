@@ -3,9 +3,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 
-predictors, response, data = utils.get_data()
+predictors, response = utils.get_data_2()
+print(predictors)
 # sns.pairplot(data, hue="Size", size=3, kind='scatter').add_legend()
-sns.heatmap(data.corr())
+#sns.heatmap(data.corr())
 
 # plt.imshow(data.corr(), cmap='hot')
-plt.show()
+#plt.show()
