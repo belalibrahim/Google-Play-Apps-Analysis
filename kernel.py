@@ -1,46 +1,45 @@
 import pandas as pd
-import numpy as np
 import seaborn as sns
 from sklearn import metrics
-from sklearn.cross_validation import train_test_split
-from sklearn.model_selection import train_test_split
-import random
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 filename = 'Data/googleplaystore.csv'
 df = pd.read_csv(filename)
-df.info()
+
 df.dropna(inplace=True)
-df.info()
-df.head()
+
 # Cleaning Categories into integers
 CategoryString = df["Category"]
 categoryVal = df["Category"].unique()
 categoryValCount = len(categoryVal)
 category_dict = {}
+
 for i in range(0, categoryValCount):
     category_dict[categoryVal[i]] = i
+
 df["Category_c"] = df["Category"].map(category_dict).astype(int)
 
 
-# scaling and cleaning size of installation
+# Scaling and cleaning size of installation
 def change_size(size):
     if 'M' in size:
         x = size[:-1]
         x = float(x) * 1000000
-        return (x)
+        return x
     elif 'k' == size[-1:]:
         x = size[:-1]
         x = float(x) * 1000
-        return (x)
+        return x
     else:
         return None
 
 
 df["Size"] = df["Size"].map(change_size)
 
-# filling Size which had NA
+# Filling Size which had NA
 df.Size.fillna(method='ffill', inplace=True)
+
 # Cleaning no of installs classification
 df['Installs'] = [int(i[:-1].replace(',', '')) for i in df['Installs']]
 
@@ -54,19 +53,26 @@ def type_cat(types):
 
 
 df['Type'] = df['Type'].map(type_cat)
+
 # Cleaning of content rating classification
 RatingL = df['Content Rating'].unique()
 RatingDict = {}
+
 for i in range(len(RatingL)):
     RatingDict[RatingL[i]] = i
+
 df['Content Rating'] = df['Content Rating'].map(RatingDict).astype(int)
-# dropping of unrelated and unnecessary items
+
+# Dropping of unrelated and unnecessary items
 df.drop(labels=['Last Updated', 'Current Ver', 'Android Ver', 'App'], axis=1, inplace=True)
+
 # Cleaning of genres
 GenresL = df.Genres.unique()
 GenresDict = {}
+
 for i in range(len(GenresL)):
     GenresDict[GenresL[i]] = i
+
 df['Genres_c'] = df['Genres'].map(GenresDict).astype(int)
 
 
@@ -81,14 +87,15 @@ def price_clean(price):
 
 
 df['Price'] = df['Price'].map(price_clean).astype(float)
-# convert reviews to numeric
-df['Reviews'] = df['Reviews'].astype(int)
-df.info()
-df.head()
-# for dummy variable encoding for Categories
-df2 = pd.get_dummies(df, columns=['Category'])
-df2.head()
 
+# Convert reviews to numeric
+df['Reviews'] = df['Reviews'].astype(int)
+
+# For dummy variable encoding for Categories
+df2 = pd.get_dummies(df, columns=['Category'])
+
+
+#######################################################################
 
 # let's use 3 different regression models with two different techniques on treating the categorical variable
 # for evaluation of error term and
