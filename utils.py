@@ -1,8 +1,8 @@
-import pandas as pd
 import locale
+import pandas as pd
 
 
-def get_data(filename):
+def get_data(filename='Data/googleplaystore.csv'):
     data = pd.read_csv(filename)
 
     data.Size = data.Size.str.extract('(\d+.\d+|\d+)')
@@ -12,7 +12,6 @@ def get_data(filename):
     data = data.dropna()
 
     locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-    datasend = data
     data.Installs = data.Installs.apply(lambda x: locale.atoi(str(x)))
 
     data.Size = pd.to_numeric(data.Size)
@@ -24,4 +23,4 @@ def get_data(filename):
     predictors = data.loc[:, data.columns != "Rating"]
     response = data.Rating
 
-    return predictors, response , datasend
+    return predictors, response, data
