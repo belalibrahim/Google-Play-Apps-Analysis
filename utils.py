@@ -1,5 +1,8 @@
 import locale
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+from itertools import combinations
 
 
 def get_data(filename='Data/googleplaystore.csv'):
@@ -111,16 +114,44 @@ def get_preprocessed_data(filename='Data/googleplaystore.csv'):
     df['Reviews'] = df['Reviews'].astype(int)
 
     # For dummy variable encoding for Categories
-    df2 = pd.get_dummies(df, columns=['Category'])
+    df_extended = pd.get_dummies(df, columns=['Category'])
 
-    return df2, df
+    return df, df_extended
 
 
 def get_data2():
 
-    df2, df = get_preprocessed_data()
+    df, df_extended = get_preprocessed_data()
 
-    X = df2.drop(labels=['Rating', 'Genres', 'Category_c', 'Genres_c'], axis=1)
-    y = df2.Rating
+    X = df.drop(labels=['Category', 'Rating', 'Genres'], axis=1)
+    y = df.Rating
 
-    return X, y, df2
+    return X, y, df
+
+
+def subset_selection(x, y):
+    x = np.array(x)
+    y = np.array(y)
+
+    l = len(x[0])
+    best_sub = []
+    min_rss = np.inf
+    # Iterate over all the features
+    for n in range(l + 1):
+        # Get all the combinations
+        all_comb = list(set(combinations(range(l), n)))
+        for i in all_comb:
+            x_sub = x[:, list(i)]
+            coff = (np.dot(np.dot(np.linalg.inv(np.dot(x_sub.T, x_sub)), x_sub.T), y))
+            y_hat = (np.dot(coff.T, x_sub.T))
+            rss = sum(np.power(y - y_hat, 2))
+            if rss < min_rss:
+                min_rss = rss
+                best_sub = list(i)
+            plt.scatter(n, rss)
+
+    print("Best subset: " + str(best_sub))
+    plt.xlabel("Number of features")
+    plt.ylabel("RSS")
+    plt.title("Subset Selection")
+    plt.show()
