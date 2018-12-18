@@ -128,7 +128,7 @@ def get_data2():
 
     df, df_extended = get_preprocessed_data()
 
-    # For regularization
+    # TODO For regularization
     df = df[:700]
 
     X = df.drop(labels=['Category', 'Rating', 'Genres'], axis=1)
@@ -192,6 +192,55 @@ def apply_reg(x, y):
     plt.ylabel("Coefficients")
     plt.title("Regularization")
     plt.show()
+
+    n_splits = 5
+    kf = KFold(n_splits=n_splits)
+
+    lambda_ = np.arange(5, 0, -0.05)
+    all_tr_err = list()
+    all_tst_err = list()
+    for i in range(len(lambda_)):
+        rss = 0
+        rss_ts = 0
+        for train_index, test_index in kf.split(x_c):
+            X_train, X_test = x_c[train_index], x_c[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+            y_train_hat = np.mean(y_train) + np.dot(coefficients[:, i], X_train.T)
+            y_test_hat = np.mean(y_train) + np.dot(coefficients[:, i], X_test.T)
+            rss += np.mean((y_train - y_train_hat) ** 2) + (lambda_[i] * np.mean((coefficients[:, i] ** 2)))
+            rss_ts += np.mean((y_test - y_test_hat) ** 2)
+        all_tr_err.append(rss / n_splits)
+        all_tst_err.append(rss_ts / n_splits)
+
+    plt.plot(np.log(lambda_), all_tst_err)
+    plt.show()
+
+
+def apply_over(x, y):
+
+    x = np.array(x)
+    y = np.array(y)
+    print(x.shape)
+    x_new = np.column_stack((x, np.power(x, 2), np.power(x, 3)))
+    print(x_new.shape)
+
+    x_c = np.zeros(list(x_new.shape))
+    n_features = x_new.shape[1]
+
+    for i in range(n_features):
+        x_c[:, i] = (x_new[:, i] - np.mean(x_new[:, i])) / np.std(x_new[:, i])
+
+    lambda_ = np.arange(1000, 0, -1)
+    coefficients = np.zeros([n_features, 1000])
+    df_lambda = list()
+
+    for i in range(len(lambda_)):
+        coefficients[:, i] = (
+            np.dot(np.dot(np.linalg.inv(np.dot(x_c.T, x_c) + (np.dot(lambda_[i], np.eye(n_features)))), x_c.T), y))
+        df_lambda.append(
+            np.trace(
+                np.dot(x_c, np.dot(np.linalg.inv(np.dot(x_c.T, x_c) + np.dot(lambda_[i], np.eye(n_features))), x_c.T))))
+
 
     n_splits = 5
     kf = KFold(n_splits=n_splits)
