@@ -7,4 +7,7 @@ predictors, response, data = utils.get_data2()
 # utils.subset_selection(predictors, response)
 
 # Apply regularization
-utils.apply_reg(predictors, response)
+# utils.apply_reg(predictors, response)
+
+# Models comparison
+utils.models_compare(predictors, response)

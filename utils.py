@@ -1,9 +1,13 @@
 import locale
+import models
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from sklearn import metrics
 import matplotlib.pyplot as plt
 from itertools import combinations
 from sklearn.model_selection import KFold
+from sklearn.model_selection import train_test_split
 
 
 def get_data(filename='Data/googleplaystore.csv'):
@@ -211,3 +215,44 @@ def apply_reg(x, y):
     plt.plot(np.log(lambda_), all_tst_err)
     plt.show()
 
+
+def Evaluationmatrix(y_true, y_predict, model):
+    print('Mean Squared Error ' + str(model) + ': ' + str(metrics.mean_squared_error(y_true, y_predict)))
+    print('Mean absolute Error ' + str(model) + ': ' + str(metrics.mean_absolute_error(y_true, y_predict)))
+    print('Mean squared Log Error ' + str(model) + ': ' + str(metrics.mean_squared_log_error(y_true, y_predict)))
+    print('\n')
+
+
+def models_compare(x, y):
+
+    X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.30)
+
+    results_svm = models.SVM(X_train, y_train, X_test)
+    sns.regplot(results_svm, y_test, color='red', label='SVM')
+    Evaluationmatrix(y_test, results_svm, "SVM")
+
+    results_tree = models.TREE(X_train, y_train, X_test)
+    sns.regplot(results_tree, y_test, color='green', label='TREE')
+    Evaluationmatrix(y_test, results_tree, "TREE")
+
+    results_ridge = models.RIDGE(X_train, y_train, X_test)
+    sns.regplot(results_ridge, y_test, color='orange', label='RIDGE')
+    Evaluationmatrix(y_test, results_ridge, "RIDGE")
+
+    results_knn = models.KNN(X_train, y_train, X_test)
+    sns.regplot(results_knn, y_test, color='yellow', label='KNN')
+    Evaluationmatrix(y_test, results_knn, "KNN")
+
+    results_lr = models.LR(X_train, y_train, X_test)
+    sns.regplot(results_lr, y_test, color='blue', label='LR')
+    Evaluationmatrix(y_test, results_lr, "LR")
+
+    results_rfr = models.RFR(X_train, y_train, X_test)
+    sns.regplot(results_rfr, y_test, color='black', label='RFR')
+    Evaluationmatrix(y_test, results_rfr, "RFR")
+
+    plt.title('Models Comparison')
+    plt.xlabel('Predicted Ratings')
+    plt.ylabel('Actual Ratings')
+    plt.legend()
+    plt.show()
